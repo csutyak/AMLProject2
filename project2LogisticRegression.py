@@ -31,6 +31,19 @@ from sklearn.linear_model import LogisticRegression
 lr = LogisticRegression(random_state=0, max_iter=100000)
 lr.fit(x_train, y_train)
 
+predictions = lr.predict(x_test)
+
 print("Training score: ", lr.score(x_train, y_train))
 print("Testing score: ", lr.score(x_test, y_test))
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+cm = confusion_matrix(y_test, predictions)
+
+disp = ConfusionMatrixDisplay(
+            confusion_matrix=cm
+        )
+disp.plot()
+
+plt.show()
