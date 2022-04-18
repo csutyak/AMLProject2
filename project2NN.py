@@ -8,11 +8,15 @@ class ResidualNet(nn.Module):
         self.linearLayer2 = nn.Linear(32, 32)
         self.linearLayer3 = nn.Linear(32, 5)
         self.dropoutLayer1 = nn.Dropout(0.1)
-    def forward(self, input):
+        self.dropoutLayer2 = nn.Dropout(0)
+    def forward(self, input, test):
         hiddenLayer1 = nn.functional.relu(self.linearLayer1(input))
         hiddenLayer2 = nn.functional.relu(self.linearLayer2(hiddenLayer1))
-        dropoutLayer1 = self.dropoutLayer1(hiddenLayer2 + hiddenLayer1)
-        output = self.linearLayer3(dropoutLayer1)
+        if test == True:
+            dropoutLayer = self.dropoutLayer2(hiddenLayer2 + hiddenLayer2)
+        else:  
+            dropoutLayer = self.dropoutLayer1(hiddenLayer2 + hiddenLayer1)
+        output = self.linearLayer3(dropoutLayer)
         return output
 
 model = ResidualNet()
@@ -80,7 +84,7 @@ for epoch in range(epochs):
         inputParams, outputLabel = batch
 
         #forward
-        predictedLabel = model(inputParams)
+        predictedLabel = model.forward(inputParams, False)
 
         #compute objective function
         lossOutput = lossFunction(predictedLabel, outputLabel)
@@ -101,7 +105,7 @@ for epoch in range(epochs):
 
         #forward
         with torch.no_grad():
-            predictedLabel = model(inputParams)
+            predictedLabel = model.forward(inputParams, True)
 
         #compute objective function
         lossOutput = lossFunction(predictedLabel, outputLabel)
@@ -123,7 +127,7 @@ y_true = []
 
 # iterate over test data
 for inputs, labels in test_loader:
-    output = model(inputs) # Feed Network
+    output = model.forward(inputs, True) # Feed Network
 
     output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
     y_pred.extend(output) # Save Prediction
